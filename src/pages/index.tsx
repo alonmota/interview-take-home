@@ -13,7 +13,6 @@ import {
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
-import { z } from 'zod';
 
 const AUTH_TOKEN = 'fake-user-1-token';
 
@@ -33,14 +32,14 @@ export default function Home() {
   });
 
   const { mutateAsync: updateUser, isLoading: isUserUpdating } = useMutation(
-    async ({ email, name }: { email: string; name: string }) => {
+    async ({ email, name, phone }: FormSchema) => {
       const response = await fetch('/api/user', {
         headers: {
           Authorization: `Basic ${AUTH_TOKEN}`,
           'Content-Type': 'application/json',
         },
         method: 'PUT',
-        body: JSON.stringify({ email, name }),
+        body: JSON.stringify({ email, name, phone }),
       });
       const data = await response.json();
 
@@ -73,6 +72,7 @@ export default function Home() {
     if (!isLoading) {
 			setValue("name", data?.user.name || '')
 			setValue("email", data?.user.email || '')
+			setValue("phone", data?.user.phone || '')
     }
   }, [isLoading, data, setValue]);
 
@@ -111,6 +111,20 @@ export default function Home() {
 											onChange={onChange}
 											value={value}
 											error={errors?.email?.message}
+										/>
+									)}
+								/>
+								<Controller
+									control={control}
+									name="phone"
+									render={({ field: { onChange, value } }) => (
+										<TextField
+											type="tel"
+											label="Phone"
+											autoComplete="(555) 555-1234"
+											onChange={onChange}
+											value={value}
+											error={errors?.phone?.message}
 										/>
 									)}
 								/>
