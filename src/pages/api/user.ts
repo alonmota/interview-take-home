@@ -1,5 +1,7 @@
+import { formSchema } from '@/common/types/form-data';
 import db from '@/server/db';
 import type { NextApiRequest, NextApiResponse } from 'next';
+import { ZodError } from 'zod';
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,6 +26,18 @@ export default async function handler(
       }
     }
     case 'PUT': {
+			let payload = null;
+			try {
+				payload = formSchema.parse(req.body) 
+				
+			} catch (error: unknown) {
+				if (error instanceof ZodError) {
+					res.status(404).json({ error: error.errors.map((e) => e.message) });
+					return;
+				}
+				res.status(400).json({ error: "Bad Request" });
+			}
+
       const user = await db.findUserByToken(userToken);
 
       if (!user) {
@@ -31,11 +45,11 @@ export default async function handler(
         return;
       }
 
-      if (req.body.email) {
+      if (payload?.email) {
         user.email = req.body.email;
       }
 
-      if (req.body.name) {
+      if (payload?.name) {
         user.name = req.body.name;
       }
 

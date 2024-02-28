@@ -1,3 +1,5 @@
+import { FormSchema, formSchema } from '@/common/types/form-data';
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Button,
   Card,
@@ -8,8 +10,10 @@ import {
   PageActions,
   TextField,
 } from '@shopify/polaris';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { z } from 'zod';
 
 const AUTH_TOKEN = 'fake-user-1-token';
 
@@ -49,31 +53,31 @@ export default function Home() {
     },
   );
 
-  const [formData, setFormData] = useState({ email: '', name: '' });
+	const { 
+		control,
+		handleSubmit, 
+		formState: { errors },
+		setValue
+	 } = useForm<FormSchema>({
+    resolver: zodResolver(formSchema),
+    mode: 'onBlur',
+    reValidateMode: 'onSubmit',
+  });
 
-  const handleNameChange = useCallback((value: string) => {
-    setFormData(prev => ({ ...prev, name: value }));
-  }, []);
 
-  const handleEmailChange = useCallback((value: string) => {
-    setFormData(prev => ({ ...prev, email: value }));
-  }, []);
-
-  const handleSubmit = useCallback(async () => {
-    await updateUser(formData);
-  }, [updateUser, formData]);
+  async function onSubmit(data: FormSchema) {
+    await updateUser(data);
+  };
 
   useEffect(() => {
     if (!isLoading) {
-      setFormData({
-        email: data?.user.email || '',
-        name: data?.user.name || '',
-      });
+			setValue("name", data?.user.name || '')
+			setValue("email", data?.user.email || '')
     }
-  }, [isLoading, data]);
+  }, [isLoading, data, setValue]);
 
   return (
-    <Form onSubmit={handleSubmit}>
+    <Form onSubmit={handleSubmit(onSubmit)}>
       <Page title="Home">
         <Layout>
           <Layout.AnnotatedSection
@@ -82,19 +86,34 @@ export default function Home() {
           >
             <Card>
               <FormLayout>
-                <TextField
-                  label="Full name"
-                  autoComplete="name"
-                  onChange={handleNameChange}
-                  value={formData.name}
-                />
-                <TextField
-                  type="email"
-                  label="Email"
-                  autoComplete="email"
-                  onChange={handleEmailChange}
-                  value={formData.email}
-                />
+
+								<Controller
+									control={control}
+									name="name"
+									render={({ field: { onChange, value } }) => (
+										<TextField
+											label="Full name"
+											autoComplete="name"
+											onChange={onChange}
+											value={value}
+											error={errors?.name?.message}
+										/>
+									)}
+								/>
+								<Controller
+									control={control}
+									name="email"
+									render={({ field: { onChange, value } }) => (
+										<TextField
+											type="email"
+											label="Email"
+											autoComplete="email"
+											onChange={onChange}
+											value={value}
+											error={errors?.email?.message}
+										/>
+									)}
+								/>
               </FormLayout>
             </Card>
           </Layout.AnnotatedSection>
