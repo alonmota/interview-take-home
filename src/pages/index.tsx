@@ -13,6 +13,8 @@ import {
 import { useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AUTH_TOKEN = 'fake-user-1-token';
 
@@ -20,30 +22,42 @@ export default function Home() {
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery(['user'], async () => {
-    const response = await fetch('/api/user', {
-      headers: {
-        Authorization: `Basic ${AUTH_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    const data = await response.json();
-
-    return data;
+    try {
+			const response = await fetch('/api/user', {
+				headers: {
+					Authorization: `Basic ${AUTH_TOKEN}`,
+					'Content-Type': 'application/json',
+				},
+			});
+			const data = await response.json();
+			if (!response.ok) {
+				throw new Error(data.error)
+			}
+			return data;
+		} catch (error) {
+			toast.error((error as Error)?.message || 'Api Error');	
+		}
   });
 
   const { mutateAsync: updateUser, isLoading: isUserUpdating } = useMutation(
     async ({ email, name, phone }: FormSchema) => {
-      const response = await fetch('/api/user', {
-        headers: {
-          Authorization: `Basic ${AUTH_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        method: 'PUT',
-        body: JSON.stringify({ email, name, phone }),
-      });
-      const data = await response.json();
-
-      return data;
+			try {
+				const response = await fetch('/api/user', {
+					headers: {
+						Authorization: `Basic ${AUTH_TOKEN}`,
+						'Content-Type': 'application/json',
+					},
+					method: 'PUT',
+					body: JSON.stringify({ email, name, phone }),
+				});
+				const data = await response.json();
+				if (!response.ok) {
+					throw new Error(data.error)
+				}
+				return data;
+			} catch (error) {
+				toast.error((error as Error)?.message || 'Api Error');	
+			}
     },
     {
       onSuccess: () => {
@@ -149,6 +163,7 @@ export default function Home() {
           }
         />
       </Page>
+			<ToastContainer />
     </Form>
   );
 }

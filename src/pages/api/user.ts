@@ -32,7 +32,7 @@ export default async function handler(
 				
 			} catch (error: unknown) {
 				if (error instanceof ZodError) {
-					res.status(404).json({ error: error.errors.map((e) => e.message) });
+					res.status(400).json({ error: error.errors.map((e) => e.message) });
 					return;
 				}
 				res.status(400).json({ error: "Bad Request" });
