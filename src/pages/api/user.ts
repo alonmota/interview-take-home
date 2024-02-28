@@ -46,16 +46,11 @@ export default async function handler(
       }
 
       if (payload?.email) {
-        user.email = req.body.email;
+        user.email = payload?.email;
       }
 
-      if (payload?.name) {
-        user.name = req.body.name;
-      }
-
-			if (payload?.phone) {
-        user.phone = req.body.phone;
-      }
+			user.name = payload?.name || '';
+			user.phone = payload?.phone || '';
 
       const success = await db.updateUser(user.id, user);
 

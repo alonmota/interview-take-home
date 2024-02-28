@@ -6,8 +6,8 @@ const phoneRegex = new RegExp(
 
 export const formSchema = z.object({ 
 	email: z.string().email(), 
-	name: z.string(),
-	phone: z.string().regex(phoneRegex, 'Invalid Number'),
+	name: z.string().optional(),
+	phone: z.string().optional().or(z.string().regex(phoneRegex, 'Invalid Number')),
 })
 
 export type FormSchema = z.infer<typeof formSchema>

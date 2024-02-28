@@ -97,6 +97,8 @@ export default function Home() {
 											onChange={onChange}
 											value={value}
 											error={errors?.name?.message}
+											clearButton={true}
+											onClearButtonClick={() => onChange('')}
 										/>
 									)}
 								/>
@@ -125,6 +127,8 @@ export default function Home() {
 											onChange={onChange}
 											value={value}
 											error={errors?.phone?.message}
+											clearButton={true}
+											onClearButtonClick={() => onChange('')}
 										/>
 									)}
 								/>
